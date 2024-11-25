@@ -1,6 +1,6 @@
 local config = require("zen-mode.config")
-local util = require("zen-mode.util")
 local plugins = require("zen-mode.plugins")
+local util = require("zen-mode.util")
 local M = {}
 
 M.bg_win = nil
@@ -159,22 +159,19 @@ function M.create(opts)
   -- should apply before calculate window's height to be able handle 'laststatus' option
   M.plugins_on_open()
 
-
-  local ok = true
-  if M.bg_buf == nil then
-    M.bg_buf = vim.api.nvim_create_buf(false, true)
-    ok, M.bg_win = pcall(vim.api.nvim_open_win, M.bg_buf, false, {
-      relative = "editor",
-      width = vim.o.columns,
-      height = M.height(),
-      focusable = false,
-      row = 0,
-      col = 0,
-      style = "minimal",
-      zindex = opts.zindex - 10,
-    })
-  end
-
+  M.bg_buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_option(M.bg_buf, "filetype", "zenmode-bg")
+  local ok
+  ok, M.bg_win = pcall(vim.api.nvim_open_win, M.bg_buf, false, {
+    relative = "editor",
+    width = vim.o.columns,
+    height = M.height(),
+    focusable = false,
+    row = 0,
+    col = 0,
+    style = "minimal",
+    zindex = opts.zindex - 10,
+  })
   if not ok then
     M.plugins_on_close()
     util.error("could not open floating window. You need a Neovim build that supports zindex (May 15 2021 or newer)")
@@ -187,6 +184,7 @@ function M.create(opts)
   local win_opts = vim.tbl_extend("keep", {
     relative = "editor",
     zindex = opts.zindex,
+    border = opts.border,
   }, M.layout(opts))
 
   local buf = vim.api.nvim_get_current_buf()
@@ -228,7 +226,7 @@ function M.fix_hl(win, normal)
     vim.api.nvim_set_current_win(win)
   end
   normal = normal or "Normal"
-  vim.cmd("setlocal winhl=NormalFloat:" .. normal)
+  vim.cmd("setlocal winhl=NormalFloat:" .. normal .. ",FloatBorder:ZenBorder")
   vim.cmd("setlocal winblend=0")
   vim.cmd([[setlocal fcs=eob:\ ,fold:\ ,vert:\]])
   -- vim.api.nvim_win_set_option(win, "winhighlight", "NormalFloat:" .. normal)
