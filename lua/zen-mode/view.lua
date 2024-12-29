@@ -159,19 +159,22 @@ function M.create(opts)
   -- should apply before calculate window's height to be able handle 'laststatus' option
   M.plugins_on_open()
 
-  M.bg_buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_option(M.bg_buf, "filetype", "zenmode-bg")
-  local ok
-  ok, M.bg_win = pcall(vim.api.nvim_open_win, M.bg_buf, false, {
-    relative = "editor",
-    width = vim.o.columns,
-    height = M.height(),
-    focusable = false,
-    row = 0,
-    col = 0,
-    style = "minimal",
-    zindex = opts.zindex - 10,
-  })
+
+  local ok = true
+  if M.bg_buf == nil then
+    M.bg_buf = vim.api.nvim_create_buf(false, true)
+    ok, M.bg_win = pcall(vim.api.nvim_open_win, M.bg_buf, false, {
+      relative = "editor",
+      width = vim.o.columns,
+      height = M.height(),
+      focusable = false,
+      row = 0,
+      col = 0,
+      style = "minimal",
+      zindex = opts.zindex - 10,
+    })
+  end
+
   if not ok then
     M.plugins_on_close()
     util.error("could not open floating window. You need a Neovim build that supports zindex (May 15 2021 or newer)")
